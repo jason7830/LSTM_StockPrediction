@@ -18,10 +18,11 @@ class Perceptron(object):
     def fit(self , X , y):  
         rgen = np.random.RandomState(self.random_state)
         self.w_ = rgen.normal(loc=0.0 , scale=0.01 , size = 1 + X.shape[1])
-
+        self.cost_ = []
         self.errors_ = []
 
         for _ in range(self.n_iter):
+            net_input = self.net_input(X)
             errors = 0
             for xi , target in zip(X,y):
                 update = self.eta * (target - self.predict(xi))
@@ -46,3 +47,4 @@ ppn = Perceptron(eta=0.1,n_iter = 10)
 ppn.fit(X,y)
 plt.plot(range(1,len(ppn.errors_) +1 , ppn.errors_,marker='o')
 plt.show()
+
