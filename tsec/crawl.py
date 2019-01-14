@@ -33,6 +33,43 @@ class Crawler():
         cw = csv.writer(f, lineterminator='\n')
         cw.writerow(row)
         f.close()
+        #http://www.twse.com.tw/exchangeReport/STOCK_DAY?reponse=csv&date=20170705&stockNo=2002
+
+    def _get_tse_data_byNo(self, date_tuple , stock_no):
+
+        date_str = '{0}{1:02d}{2:02d}'.format(date_tuple[0], date_tuple[1], date_tuple[2])
+        url = 'http://www.twse.com.tw/exchangeReport/STOCK_DAY'
+
+        query_params = {
+            'response': 'json',
+            'date': date_str,
+            'stockNo': stock_no
+        }    
+        # Get json data
+        page = requests.get(url, params=query_params)
+        if not page.ok:
+            logging.error("Can not get TSE data at {}".format(date_str))
+            return
+
+        content = page.json()
+
+        # For compatible with original data
+        date_str_mingguo = '{0}/{1:02d}/{2:02d}'.format(date_tuple[0] - 1911, date_tuple[1], date_tuple[2])
+
+        for data in content['data']:
+            row = self._clean_row([
+                data[0], # 日期
+                data[1], # 成交股數
+                data[2], # 成交金額
+                data[3], # 開盤價
+                data[4], # 最高價
+                data[5], # 最低價
+                data[6], # 收盤價
+                data[7], # 漲跌價差
+                data[8], # 成交筆數
+            ])
+            self._record(stock_no, row)
+
 
     def _get_tse_data(self, date_tuple):
         date_str = '{0}{1:02d}{2:02d}'.format(date_tuple[0], date_tuple[1], date_tuple[2])
@@ -53,7 +90,7 @@ class Crawler():
             return
 
         content = page.json()
-
+        print(page.url)
         # For compatible with original data
         date_str_mingguo = '{0}/{1:02d}/{2:02d}'.format(date_tuple[0] - 1911, date_tuple[1], date_tuple[2])
 
@@ -70,7 +107,6 @@ class Crawler():
                 sign + data[10], # 漲跌價差
                 data[3], # 成交筆數
             ])
-
             self._record(data[0].strip(), row)
 
     def _get_otc_data(self, date_tuple):
@@ -112,6 +148,7 @@ class Crawler():
 
 def main():
     # Set logging
+
     if not os.path.isdir('log'):
         os.makedirs('log')
     logging.basicConfig(filename='log/crawl-error.log',
@@ -127,8 +164,11 @@ def main():
         help='crawl back from assigned day until 2004/2/11')
     parser.add_argument('-c', '--check', action='store_true',
         help='crawl back 10 days for check data')
+    parser.add_argument('-no' , type=int ,
+        help='Sotck Number')
 
     args = parser.parse_args()
+
 
     # Day only accept 0 or 3 arguments
     if len(args.day) == 0:
@@ -146,9 +186,20 @@ def main():
         # otc first day is 2007/04/20
         # tse first day is 2004/02/11
 
-        last_day = datetime(2004, 2, 11) if args.back else first_day - timedelta(10)
+        if args.no:
+            last_day = first_day - timedelta(30 * 3)
+        else:
+            last_day = datetime(2004, 2, 11) if args.back else first_day - timedelta(10)
         max_error = 5
         error_times = 0
+        
+        first_day = datetime(2017,1,1)
+        if args.no :
+            while  datetime(2004, 2, 11) <= first_day:
+                print('Crawling {}'.format((first_day.year, first_day.month)))
+                crawler._get_tse_data_byNo((first_day.year, first_day.month, first_day.day),args.no)
+                first_day -= timedelta(30)
+            return
 
         while error_times < max_error and first_day >= last_day:
             try:
