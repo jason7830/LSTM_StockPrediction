@@ -8,7 +8,16 @@ class DataProcessor(object):
 
 	def show(self):
 		df = pd.read_csv(self.path)
-		print(df.tail())
+		y = df.iloc[0:,6].values
+		for i in range(len(y)-1):
+			if y[i] >= y[i+1]:
+				y[i] = 0
+			else:
+				y[i] = 1
+		X = df.iloc[0:,[0,1,3,4,5,6]].values
+
+		print(X)
+
 
 
 def main():
