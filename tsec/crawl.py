@@ -193,9 +193,9 @@ def main():
         max_error = 5
         error_times = 0
         
-
+        first_day = datetime(2017,1,1)
         if args.no :
-            while  last_day <= first_day:
+            while  datetime(2004, 2, 11) <= first_day:
                 print('Crawling {}'.format((first_day.year, first_day.month)))
                 crawler._get_tse_data_byNo((first_day.year, first_day.month, first_day.day),args.no)
                 first_day -= timedelta(30)
