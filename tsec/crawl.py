@@ -53,9 +53,9 @@ class Crawler():
 
         content = page.json()
 
-        # For compatible with original data
-        date_str_mingguo = '{0}/{1:02d}/{2:02d}'.format(date_tuple[0] - 1911, date_tuple[1], date_tuple[2])
 
+        # For compatible with original data
+        #date_str_mingguo = '{0}/{1:02d}/{2:02d}'.format(date_tuple[0] - 1911, date_tuple[1], date_tuple[2])
         for data in content['data']:
             row = self._clean_row([
                 data[0], # 日期
@@ -72,6 +72,7 @@ class Crawler():
 
 
     def _get_tse_data(self, date_tuple):
+        print("123")
         date_str = '{0}{1:02d}{2:02d}'.format(date_tuple[0], date_tuple[1], date_tuple[2])
         url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX'
 
@@ -81,7 +82,6 @@ class Crawler():
             'type': 'ALL',
             '_': str(round(time.time() * 1000) - 500)
         }
-
         # Get json data
         page = requests.get(url, params=query_params)
 
@@ -90,7 +90,6 @@ class Crawler():
             return
 
         content = page.json()
-        print(page.url)
         # For compatible with original data
         date_str_mingguo = '{0}/{1:02d}/{2:02d}'.format(date_tuple[0] - 1911, date_tuple[1], date_tuple[2])
 
@@ -193,9 +192,9 @@ def main():
         max_error = 5
         error_times = 0
         
-        first_day = datetime(2010,10,1)
+        first_day = datetime(1995,11,1)
         if args.no :
-            while  datetime(2004, 2, 11) <= first_day:
+            while  datetime(1994, 8, 11) <= first_day:
                 print('Crawling {}'.format((first_day.year, first_day.month)))
                 crawler._get_tse_data_byNo((first_day.year, first_day.month, first_day.day),args.no)
                 first_day -= timedelta(30)
