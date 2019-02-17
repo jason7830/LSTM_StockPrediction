@@ -193,7 +193,7 @@ def main():
         max_error = 5
         error_times = 0
         
-        first_day = datetime(2017,1,1)
+        first_day = datetime(2010,10,1)
         if args.no :
             while  datetime(2004, 2, 11) <= first_day:
                 print('Crawling {}'.format((first_day.year, first_day.month)))
