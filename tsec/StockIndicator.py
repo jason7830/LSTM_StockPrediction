@@ -5,10 +5,24 @@ import csv
 class Indicators():
 	def __init__(self , path):
 		self.path = path
-		self.list = []
+		self.list = [0]
+		self.incs = [0]
+		self.decs = [0]
+		self.closed = []
 		with open(path) as data:
 			for row in csv.reader(data):
 				self.list.append(row)
+		for i in range(1,len(self.list)):
+			self.closed.append(float(self.list[i][7]))
+			if i < 1 :
+				continue
+			t = float(self.list[i][7])
+			if t >= 0:
+				self.incs.append(t)
+				self.decs.append(0)
+			else:
+				self.incs.append(0)
+				self.decs.append(t*-1)
 
 
 	#n日RSI
@@ -16,19 +30,27 @@ class Indicators():
 		#漲/跌
 		incs = [0]
 		decs = [0]
-		for i in range(1,len(self.list)):
-			#(float(self.list[i][7]) > 0)
-			t = float(self.list[i][7])
-			if t >= 0 :
-				incs.append(t)
-				decs.append(0)
-			else:
-				incs.append(0)
-				decs.append(t*-1)
-			if i >= n:
-				rs = (np.mean(incs[i-n+1:i+1])/(np.mean(incs[i-n+1:i+1]) + np.mean(decs[i-n+1:i+1])))
-				rsi = 100 - 100 / (1 + rs)
-				print(rsi)
+		for i in range(n-1,len(self.list)):
+			rs = (np.mean(self.incs[i-n+1:i+1])/(np.mean(self.incs[i-n+1:i+1]) + np.mean(self.decs[i-n+1:i+1])))
+			rsi = 100 - 100 / (1 + rs)
+			print(rsi)
+	def wrsi(self,n):
+		#Upt-1
+		Upt = 0
+		up = np.mean(self.incs[1:7]) 
+		Dnt = 0
+		dn = np.mean(self.decs[1:7])
+		print(up,dn,self.incs[1:7])
+		for i in range(n+1,len(self.list)):
+			Upt = up
+			up = Upt + 1 / n * (self.incs[i] - Upt)
+			Dnt = dn
+			dn = Dnt + 1 / n * (self.decs[i] - Dnt)
+			rs = up / dn
+			wrsi = 100 / (100 / (1+rs) )
+			print(up,dn,wrsi)
+			return
+
 
 	#n日移動平均線			
 	def ma(self , n):
@@ -54,4 +76,4 @@ class Indicators():
 
 
 indicator = Indicators("data/2330.csv")
-indicator.ema(6)
+indicator.wrsi(6)
