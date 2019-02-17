@@ -34,22 +34,22 @@ class Indicators():
 			rs = (np.mean(self.incs[i-n+1:i+1])/(np.mean(self.incs[i-n+1:i+1]) + np.mean(self.decs[i-n+1:i+1])))
 			rsi = 100 - 100 / (1 + rs)
 			print(rsi)
+
 	def wrsi(self,n):
 		#Upt-1
 		Upt = 0
 		up = np.mean(self.incs[1:7]) 
 		Dnt = 0
 		dn = np.mean(self.decs[1:7])
-		print(up,dn,self.incs[1:7])
+		#print(up,dn,self.decs[1:7])
 		for i in range(n+1,len(self.list)):
 			Upt = up
 			up = Upt + 1 / n * (self.incs[i] - Upt)
 			Dnt = dn
 			dn = Dnt + 1 / n * (self.decs[i] - Dnt)
 			rs = up / dn
-			wrsi = 100 / (100 / (1+rs) )
+			wrsi = 100 * up /  (dn + up)
 			print(up,dn,wrsi)
-			return
 
 
 	#n日移動平均線			
