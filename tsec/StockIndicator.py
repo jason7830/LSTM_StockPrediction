@@ -1,6 +1,19 @@
 import os
 import numpy as np
 import csv
+import pandas as pd
+
+"""
+list[0], # 日期
+list[1], # 成交股數
+list[2], # 成交金額
+list[3], # 開盤價
+list[4], # 最高價
+list[5], # 最低價
+list[6], # 收盤價
+list[7], # 漲跌價差
+list[8], # 成交筆數
+"""
 
 class Indicators():
 	def __init__(self , path):
@@ -8,12 +21,19 @@ class Indicators():
 		self.list = []
 		self.incs = [0]
 		self.decs = [0]
+		self.high = []
+		self.low = []
 		self.closed = []
+		self.volume = []
 		with open(path) as data:
 			for row in csv.reader(data):
 				self.list.append(row)
-		for i in range(1,len(self.list)):
-			self.closed.append(float(self.list[i][7]))
+		for i in range(len(self.list)):
+			self.volume.append(float(self.list[i][1]))
+			self.high.append(float(self.list[i][4]))
+			self.low.append(float(self.list[i][5]))
+			self.closed.append(float(self.list[i][6]))
+
 			if i < 1 :
 				continue
 			t = float(self.list[i][7])
@@ -33,7 +53,7 @@ class Indicators():
 		for i in range(n-1,len(self.list)):
 			rs = (np.mean(self.incs[i-n+1:i+1])/(np.mean(self.incs[i-n+1:i+1]) + np.mean(self.decs[i-n+1:i+1])))
 			rsi = 100 - 100 / (1 + rs)
-			print(rsi)
+		return rsi
 
 	def wrsi(self,n):
 		#Upt-1
@@ -42,14 +62,15 @@ class Indicators():
 		Dnt = 0
 		dn = np.mean(self.decs[1:7])
 		#print(up,dn,self.decs[1:7])
+		wrsi = [0] * (n+1)
 		for i in range(n+1,len(self.list)):
 			Upt = up
 			up = Upt + 1 / n * (self.incs[i] - Upt)
 			Dnt = dn
 			dn = Dnt + 1 / n * (self.decs[i] - Dnt)
-			rs = up / dn
-			wrsi = 100 * up /  (dn + up)
-			print(up,dn,wrsi)
+			#rs = up / dn
+			wrsi.append(100 * up /  (dn + up))
+		return wrsi
 
 
 	#n日移動平均線			
@@ -81,18 +102,55 @@ class Indicators():
 				emanl.append(np.mean(di))
 		return [emans , emanl , dif]
 
+
+
 	def macd(self , ns , nl ,n):
 		emans , emanl , dif = self.ema(ns,nl)
-		macdn = [0] * (nl-1)
-		for i in range(nl,len(self.list)):
+		macdn = [0] * (nl+n-2)
+		for i in range(nl+n-1,len(self.list)):
 			pass
-			if i == nl:
-				macdn.append(np.mean(dif[i-n+1:i]))
+			if i == (nl+n-1): # n日內 => [i-n+1:i+1]
+				macdn.append(np.mean(dif[i-n+1:i+1]))
 			macdn.append((macdn[i-1] * (n-1) + dif[i] * 2) / (n+1))
-		print(macdn[26:40])
+		return [emans , emanl , macdn] 
 
-			
+	def KD(self , n):
+		pass
+		k = [0] * (n-2)
+		d = [0] * (n-2)
+		k.append(50)
+		d.append(50)
+		for i in range(n-1,len(self.list)):
+			pass
+			nlow = min(self.low[i-n+1:i+1])
+			nhigh = max(self.high[i-n+1:i+1])
+			rsv = (self.closed[i] - nlow) / (nhigh - nlow) * 100
+			k.append((k[i-1] * 2 + rsv) / 3)
+			d.append((d[i-1] * 2 + k[i]) / 3)
+		return [k , d]
+
+indicator = Indicators("data/2330.csv")		
+ema6 , ema12 ,dif  = indicator.ema(6,12)
+ema12 , ema26 , macd12_26_9 = indicator.macd(12,26,9)
+wrsi = indicator.wrsi(6)
+K , D = indicator.KD(9)
 
 
-indicator = Indicators("data/2330.csv")
-indicator.macd(12,26,9)
+
+cols = ["EMA","wRSI","K","D"]
+dict = {
+	"closed" : indicator.closed,
+	"volume": indicator.volume,
+	"ema6" : ema6,
+	"ema12" : ema12,
+	"ema26" : ema26,
+	"macd" : macd12_26_9,
+	"wrsi6" : wrsi,
+	"K9": K,
+	"D9" : D 
+}
+
+df = pd.DataFrame(dict)
+df.to_csv("data/2330_indicators.csv", sep=',', encoding='utf-8')
+
+
