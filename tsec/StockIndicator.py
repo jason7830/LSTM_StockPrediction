@@ -5,7 +5,7 @@ import csv
 class Indicators():
 	def __init__(self , path):
 		self.path = path
-		self.list = [0]
+		self.list = []
 		self.incs = [0]
 		self.decs = [0]
 		self.closed = []
@@ -61,19 +61,38 @@ class Indicators():
 				ma = np.mean(closed[i-n+1:i+1])
 				print(ma)
 
-	def ema(self , n):
+	#n日長短ema,return: [emans , emanl , diff]
+	def ema(self , ns , nl):
 		di = []
-		ema = [0] * 11
+		dif = [0] * (nl)
+		emans = [0] * (ns-1)
+		emanl = [0] * (nl-1)
 		for i in range(len(self.list)):
+			#print(i,self.list[i][4],self.list[i][5],self.list[i][6])
 			di.append((float(self.list[i][4])+float(self.list[i][5])+float(self.list[i][6])*2)/4)
-			if i == n-1:
-				ema.append(np.mean(di))
-			if i >= n:
-				ema.append((ema[i-1] * (n-2) + di[i] * 2)/n)
+			if i == ns-1:
+				emans.append(np.mean(di))
+			if i >= ns:
+				emans.append((emans[i-1] * (ns - 2) + di[i] * 2) / ns)
+				if i>= nl:
+					emanl.append((emanl[i-1] * (nl - 2) + di[i] * 2) / nl)
+					dif.append(emans[i] - emanl[i])
+			if i == nl-1:
+				emanl.append(np.mean(di))
+		return [emans , emanl , dif]
 
+	def macd(self , ns , nl ,n):
+		emans , emanl , dif = self.ema(ns,nl)
+		macdn = [0] * (nl-1)
+		for i in range(nl,len(self.list)):
+			pass
+			if i == nl:
+				macdn.append(np.mean(dif[i-n+1:i]))
+			macdn.append((macdn[i-1] * (n-1) + dif[i] * 2) / (n+1))
+		print(macdn[26:40])
 
 			
 
 
 indicator = Indicators("data/2330.csv")
-indicator.wrsi(6)
+indicator.macd(12,26,9)
