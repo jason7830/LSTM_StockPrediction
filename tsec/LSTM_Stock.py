@@ -55,7 +55,7 @@ model_lstm.add(Dense(1))
 model_lstm.summary()
 model_lstm.compile(loss='mean_squared_error',optimizer='Adam')
 early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
-history_model_lstm = model_lstm.fit(X_train, Y_train, epochs=200, batch_size=500, shuffle=False)
+history_model_lstm = model_lstm.fit(X_train, Y_train, epochs=2000, batch_size=50, shuffle=False)
 
 y_pred_test_lstm = model_lstm.predict(X_val)
 print(y_pred_test_lstm)
