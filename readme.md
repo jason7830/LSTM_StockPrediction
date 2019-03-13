@@ -6,7 +6,7 @@
  **Ojective: Predict future 20-days price.**
 
 ## To be solved
-**It can only predict tommorow's price now with the error up to 30 percent. If so, the error must be uder 10 percent, because stocks in Taiwan have the limit set by the Financial Supervisory Commission which allows price to rise or drop up to ten percent in one single day. Or the result is considered has no reference value.**
+**It can only predict tommorow's price now with the error up to 30 percent. If so, the error must be uder 10 percent, because stocks in Taiwan have the limit set by the Financial Supervisory Commission. Which allows price to rise or drop up to ten percent in one single day. Or the result is considered has no reference value.**
 
 - Try to build a new model which has ability to predict recursively.
 - Multi outputs.
