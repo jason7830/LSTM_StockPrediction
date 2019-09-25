@@ -9,6 +9,7 @@ import argparse
 import logging
 import csv
 import re
+import time
 class Crawler():
     def __init__(self,dir='data'):
         # save in directory 'data'
@@ -34,6 +35,8 @@ class Crawler():
         for s in reversed(result.text.split('\n')[2:-6]):
             #row cleanup and split
             row = re.sub('[",]','',s[:-2].replace(',"','_')).split('_')
+            if len(row) != 9:
+                break
             self.writeCSV(no,row)
 
 def subOneMonth(date):
@@ -71,6 +74,7 @@ def main():
 
     # Day only accept 0 or 2 arguments
     day = None
+    b_day = None
     try:
         #set day to assigned fisrt day or by default day which is today
         if args.day == None:
@@ -85,14 +89,16 @@ def main():
             if args.end:
                 b_day = datetime(2009,12,31)
             else:
-                day = datetime(int(args.day[:4]),int(args.day[5:]),1)
+                b_day = datetime(int(args.bday[:4]),int(args.bday[5:]),1)
 
-            while(day>b_day):
+            while(day>=b_day):
                 d = str(day.date())
                 crawler.getStockByNo(d.replace('-',''),args.no)
+                d
                 msg = "{}-{} Stock.{} done!".format(d[:4],d[5:7],args.no)
                 pushMsg(msg)
                 day = subOneMonth(day)
+                time.sleep(0.8)
         else:
             d = str(day.date())
             crawler.getStockByNo(d.replace('-',''),args.no)
