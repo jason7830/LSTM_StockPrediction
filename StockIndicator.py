@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import os
 import numpy as np
 import csv
 import pandas as pd
+import argparse
 
 """
 list[0], # 日期
@@ -15,7 +18,7 @@ list[7], # 漲跌價差
 list[8], # 成交筆數
 """
 
-class Indicators():
+class Indicator():
 	def __init__(self , path):
 		self.path = path
 		self.list = []
@@ -25,7 +28,7 @@ class Indicators():
 		self.low = []
 		self.closed = []
 		self.volume = []
-		with open(path) as data:
+		with open(path,'r') as data:
 			for row in csv.reader(data):
 				self.list.append(row)
 		for i in range(len(self.list)):
@@ -52,8 +55,8 @@ class Indicators():
 		decs = [0]
 		for i in range(n-1,len(self.list)):
 			rs = (np.mean(self.incs[i-n+1:i+1])/(np.mean(self.incs[i-n+1:i+1]) + np.mean(self.decs[i-n+1:i+1])))
-			rsi = 100 - 100 / (1 + rs)
-		return rsi
+			self.rsi = 100 - 100 / (1 + rs)
+		return self.rsi
 
 	def wrsi(self,n):
 		#Upt-1
@@ -129,6 +132,48 @@ class Indicators():
 			d.append((d[i-1] * 2 + k[i]) / 3)
 		return [k , d]
 
+def generateCSV(file):
+	indicator = Indicator(file)		
+	ema6 , ema12 ,dif  = indicator.ema(6,12)
+	ema12 , ema26 , macd12_26_9 = indicator.macd(12,26,9)
+	wrsi = indicator.wrsi(6)
+	K , D = indicator.KD(9)
+	dict_indicators = {
+		"closed" : indicator.closed,
+		"volume": indicator.volume,
+		"ema6" : ema6,
+		"ema12" : ema12,
+		"ema26" : ema26,
+		"macd" : macd12_26_9,
+		"wrsi6" : wrsi,
+		"K9": K,
+		"D9" : D 
+	}
+	pd.DataFrame(dict_indicators).to_csv(file[:-4]+"_indicators.csv",sep=',',encoding='utf-8')
+	print("{} Indicators has generated.".format(file))
+
+def main():
+    parser = argparse.ArgumentParser(description='Stock Indicators.')
+    parser.add_argument('-f','--file', nargs='*',
+        help='Stock to generate indicators.')
+    parser.add_argument('-d','--dir', nargs='*',
+        help='All csv files in dir to be generate indicators.')
+    args = parser.parse_args()
+    if args.dir != None:
+        file_names = os.listdir(args.dir[0])
+        for file_name in file_names:
+            if not file_name.endswith('.csv'):
+                continue
+            generateCSV("{}/{}".format(args.dir[0],file_name))
+    elif args.file != None:
+        generateCSV(args.file[0])
+    else:
+        print('Enter atleast one arg, see help by "-h".')
+
+
+if __name__ == "__main__":
+	main()
+"""
 indicator = Indicators("data/2330.csv")		
 ema6 , ema12 ,dif  = indicator.ema(6,12)
 ema12 , ema26 , macd12_26_9 = indicator.macd(12,26,9)
@@ -153,4 +198,4 @@ dict = {
 df = pd.DataFrame(dict)
 df.to_csv("data/2330_indicators.csv", sep=',', encoding='utf-8')
 
-
+"""
