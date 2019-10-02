@@ -21,8 +21,17 @@ class Arranger():
         #remove Duplitcate
         with open(self.file,'r') as f:
             reader = csv.reader(f)
+            #store the previous row temporary
+            tmp = None
             for r in reader:
+                #remove empty row
+                if '--' in str(r):
+                    continue
+                #計算不比價的漲幅欄位
+                if r[-2] == 'X0.00':
+                    r[-2] = "{:.2f}".format(float(r[-3]) - float(tmp[-3]))
                 dict_rows[r[0]] = r
+                tmp = r
         #sort by date
         rows = [row for date, row in sorted(dict_rows.items(), key=lambda x: self.minguo2Date(x[0]))]
         self.writeCSV(rows)
@@ -33,7 +42,7 @@ class Arranger():
 def main():    
     parser = argparse.ArgumentParser(description='Data Arraning')
     parser.add_argument('-f','--file', nargs='*',
-        help='File to be arranged.')
+        help='CSV file to be arranged.')
     parser.add_argument('-d','--dir', nargs='*',
         help='All csv files in dir to be arranged.')
     

@@ -63,11 +63,11 @@ def main():
     logging.basicConfig(filename='craw.log',level=logging.INFO,format='%(asctime)s - [%(levelname)s] - %(message)s')
     parser = argparse.ArgumentParser(description='Crawl data at assigned day')
     parser.add_argument('-day', nargs='?',
-        help='assigned day (format: YYYY-MM), default is today')
+        help='crawl an assigned day (format: YYYY-MM), default is today')
     parser.add_argument('-bday', nargs='?',
         help='crawl back from today to assigned day, maxium backs to 2010')
     parser.add_argument('-e', '--end', action='store_true',
-        help='crawl back from today to assigned day, maxium backs to 2010')
+        help='crawl back from today to 2010')
     parser.add_argument('-no' , type=int ,
         help='Sotck Number')
     args = parser.parse_args()
@@ -98,6 +98,7 @@ def main():
                 msg = "{}-{} Stock.{} done!".format(d[:4],d[5:7],args.no)
                 pushMsg(msg)
                 day = subOneMonth(day)
+                #slow down to prevent being blocked by server because of the rate limiting
                 time.sleep(0.8)
         else:
             d = str(day.date())
