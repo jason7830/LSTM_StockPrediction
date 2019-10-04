@@ -22,6 +22,7 @@ class Indicator():
 	def __init__(self , path):
 		self.path = path
 		self.list = []
+		self.date = []
 		self.incs = [0]
 		self.decs = [0]
 		self.high = []
@@ -32,6 +33,7 @@ class Indicator():
 			for row in csv.reader(data):
 				self.list.append(row)
 		for i in range(len(self.list)):
+			self.date.append(self.list[i][0])
 			self.volume.append(float(self.list[i][1]))
 			self.high.append(float(self.list[i][4]))
 			self.low.append(float(self.list[i][5]))
@@ -139,6 +141,7 @@ def generateCSV(file):
 	wrsi = indicator.wrsi(6)
 	K , D = indicator.KD(9)
 	dict_indicators = {
+		"date" : indicator.date,
 		"closed" : indicator.closed,
 		"volume": indicator.volume,
 		"ema6" : ema6,
@@ -149,7 +152,7 @@ def generateCSV(file):
 		"K9": K,
 		"D9" : D 
 	}
-	pd.DataFrame(dict_indicators).to_csv(file[:-4]+"_indicators.csv",sep=',',encoding='utf-8')
+	pd.DataFrame(dict_indicators).to_csv(file[:-4]+"_indicators.csv",sep=',',index=False,encoding='utf-8')
 	print("{} Indicators has generated.".format(file))
 
 def main():
