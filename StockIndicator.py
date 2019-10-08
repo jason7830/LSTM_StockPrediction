@@ -152,7 +152,8 @@ def generateCSV(file):
 		"K9": K,
 		"D9" : D 
 	}
-	pd.DataFrame(dict_indicators).to_csv(file[:-4]+"_indicators.csv",sep=',',index=False,encoding='utf-8')
+	sp = file.split('/')
+	pd.DataFrame(dict_indicators).to_csv('{}/{}/{}_indicators.csv'.format(sp[0],'indicators',sp[1][:-4]),sep=',',index=False,encoding='utf-8')
 	print("{} Indicators has generated.".format(file))
 
 def main():
