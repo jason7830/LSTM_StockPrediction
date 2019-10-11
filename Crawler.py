@@ -32,11 +32,11 @@ class Crawler():
         result = requests.get(twse,params=para)
         if not result.ok:
             raise ConnectionError
-        for s in reversed(result.text.split('\n')[2:-6]):
+        for s in reversed(result.text.split('\n')):
             #row cleanup and split
             row = re.sub('[",]','',s[:-2].replace(',"','_')).split('_')
-            if len(row) != 9:
-                break
+            if len(row) != 9 or row[0] == '日期':
+                continue
             self.writeCSV(no,row)
 
 def subOneMonth(date):
