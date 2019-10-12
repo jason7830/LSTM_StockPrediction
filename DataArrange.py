@@ -8,6 +8,8 @@ class Arranger():
         self.file = file
 
     def minguo2Date(self, ming):
+        if len(ming) == 8:
+            return ming
         y , m , d = ming.split('/')
         return datetime(int(y)+1911,int(m),int(d))
 
